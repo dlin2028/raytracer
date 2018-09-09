@@ -21,9 +21,9 @@ namespace DavidMonoIntro
             graphicsDevice = gfx;
             vertexPositionColors = new[]
             {
-                new VertexPositionColor(new Vector3(100, 100, 0), Color.Green),
-                new VertexPositionColor(new Vector3(150, 150, 0), Color.Red),
-                new VertexPositionColor(new Vector3(150, 200, 0), Color.Green)
+                new VertexPositionColor(new Vector3(100, 50, 0), Color.Green),
+                new VertexPositionColor(new Vector3(150, 100, 0), Color.Red),
+                new VertexPositionColor(new Vector3(150, 150, 0), Color.Green)
             };
             basicEffect = new BasicEffect(gfx);
             basicEffect.World = Matrix.CreateOrthographicOffCenter(
@@ -36,7 +36,7 @@ namespace DavidMonoIntro
                 {
                     if (vert.Position.X < low.X)
                     {
-                         low.X = (int)vert.Position.X;
+                        low.X = (int)vert.Position.X;
                     }
                     else if (vert.Position.X > high.X)
                     {
@@ -57,6 +57,36 @@ namespace DavidMonoIntro
             }
         }
 
+        public bool IntersectsLine(Vector2 start, Vector2 end)
+        {
+            Vector2 direction = end - start;
+
+            Vector2 normal = new Vector2(-direction.Y, direction.X);
+
+            double min = Vector2.Dot(vertexPositionColors[0].Position.ToVector2(), normal);
+            double max = Vector2.Dot(vertexPositionColors[0].Position.ToVector2(), normal);
+
+            for (int i = 1; i < vertexPositionColors.Length; i++)
+            {
+                double result = Vector2.Dot(vertexPositionColors[i].Position.ToVector2(), normal);
+                if (result < min)
+                {
+                    min = result;
+                }
+                if (result > max)
+                {
+                    max = result;
+                }
+            }
+
+            if (0 > min && 0 < max)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
         public void Draw(SpriteBatch sb)
         {
             EffectTechnique effectTechnique = basicEffect.Techniques[0];
@@ -65,14 +95,13 @@ namespace DavidMonoIntro
             foreach (EffectPass pass in effectPassCollection)
             {
                 pass.Apply();
-
                 graphicsDevice.DrawUserPrimitives(PrimitiveType.TriangleList,
                     vertexPositionColors, 0, 1);
             }
 
-            var pixel = new Texture2D(graphicsDevice, 1, 1);
-            pixel.SetData(new Color[] { Color.Red });
-            sb.Draw(pixel, grossBox, Color.Red);
+            //var pixel = new Texture2D(graphicsDevice, 1, 1);
+            //pixel.SetData(new Color[] { Color.Red });
+            //sb.Draw(pixel, grossBox, Color.Red);
         }
     }
 }

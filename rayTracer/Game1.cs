@@ -13,8 +13,11 @@ namespace DavidMonoIntro
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
 
-
-
+        MouseState ms;
+        Vector2 center;
+        Texture2D pixel;
+        Obstacle obstacle;
+        bool hit = false;
         //Get as many balls bouncing on the screen and stay at 60fps
 
 
@@ -31,17 +34,17 @@ namespace DavidMonoIntro
             base.Initialize();
         }
 
-        Texture2D pixel;
-        Obstacle obstacle;
+
+
         protected override void LoadContent()
         {
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
             pixel = new Texture2D(GraphicsDevice, 1, 1);
-            pixel.SetData(new Color[] { Color.Red });
+            pixel.SetData(new Color[] { Color.White });
             obstacle = new Obstacle(GraphicsDevice);
-
+            center = new Vector2(GraphicsDevice.Viewport.Width / 2, GraphicsDevice.Viewport.Height / 2);
             // TODO: use this.Content to load your game content here
         }
 
@@ -61,10 +64,8 @@ namespace DavidMonoIntro
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
-                Exit();
-
-            // TODO: Add your update logic here
+            ms = Mouse.GetState();
+            hit = obstacle.IntersectsLine(center, ms.Position.ToVector2());
 
             base.Update(gameTime);
         }
@@ -76,18 +77,28 @@ namespace DavidMonoIntro
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
+
             spriteBatch.Begin();
 
-            MouseState state = Mouse.GetState();
-            DrawLine(spriteBatch, new Vector2(GraphicsDevice.Viewport.Width / 2, GraphicsDevice.Viewport.Height / 2), new Vector2(state.X, state.Y));
-
+            DrawLine(spriteBatch, center, ms.Position.ToVector2(), Color.White);
+            var diff = ms.Position.ToVector2() - center;
+            var recip = new Vector2(-diff.Y, diff.X);
+            DrawLine(spriteBatch, ms.Position.ToVector2() - recip * 10, ms.Position.ToVector2() + recip * 10, Color.White);
             obstacle.Draw(spriteBatch);
-            
-            // TODO: Add your drawing code here
-            base.Draw(gameTime);
+
+            if (hit)
+            {
+                spriteBatch.Draw(pixel, new Rectangle(0, 0, 10, 10), Color.Red);
+            }
+
+
+
             spriteBatch.End();
+
+            base.Draw(gameTime);
         }
-        void DrawLine(SpriteBatch sb, Vector2 start, Vector2 end)
+
+        void DrawLine(SpriteBatch sb, Vector2 start, Vector2 end, Color color)
         {
             Vector2 edge = end - start;
             // calculate angle to rotate line
@@ -102,11 +113,12 @@ namespace DavidMonoIntro
                     (int)edge.Length(), //sb will strech the texture to fill this rectangle
                     1), //width of line, change this to make thicker line
                 null,
-                Color.Red, //colour of line
+                color, //colour of line
                 angle,     //angle of line (calulated above)
                 new Vector2(0, 0), // point in line about which to rotate
                 SpriteEffects.None,
                 0);
+
 
         }
     }

@@ -42,6 +42,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="castTarget.cs" />
+    <Compile Include="Extensions.cs" />
     <Compile Include="Game1.cs" />
     <Compile Include="Obstacle.cs" />
     <Compile Include="Program.cs" />
