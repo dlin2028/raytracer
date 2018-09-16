@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,9 +22,11 @@ namespace DavidMonoIntro
             graphicsDevice = gfx;
             vertexPositionColors = new[]
             {
-                new VertexPositionColor(new Vector3(100, 50, 0), Color.Green),
-                new VertexPositionColor(new Vector3(150, 100, 0), Color.Red),
-                new VertexPositionColor(new Vector3(150, 150, 0), Color.Green)
+                new VertexPositionColor(new Vector3(100, 100, 0), Color.Yellow),
+                new VertexPositionColor(new Vector3(200, 100, 0), Color.Red),
+                new VertexPositionColor(new Vector3(200, 200, 0), Color.Green),
+                new VertexPositionColor(new Vector3(100, 200, 0), Color.Blue),
+                new VertexPositionColor(new Vector3(100, 100, 0), Color.Yellow),
             };
             basicEffect = new BasicEffect(gfx);
             basicEffect.World = Matrix.CreateOrthographicOffCenter(
@@ -57,25 +60,37 @@ namespace DavidMonoIntro
             }
         }
 
+        public double min;
+        public double max;
+        public int minIndex;
+        public int maxIndex;
+        Vector2 left;
+        Vector2 right;
         public bool IntersectsLine(Vector2 start, Vector2 end)
         {
-            Vector2 direction = end - start;
+            if (Keyboard.GetState().IsKeyDown(Keys.Space))
+            {
 
+            }
+            Vector2 direction = end - start;
             Vector2 normal = new Vector2(-direction.Y, direction.X);
 
-            double min = Vector2.Dot(vertexPositionColors[0].Position.ToVector2(), normal);
-            double max = Vector2.Dot(vertexPositionColors[0].Position.ToVector2(), normal);
-
+            min = Vector2.Dot(vertexPositionColors[0].Position.ToVector2(), normal) / direction.Length();
+            max = Vector2.Dot(vertexPositionColors[0].Position.ToVector2(), normal) / direction.Length();
+            minIndex = 0;
+            maxIndex = 0;
             for (int i = 1; i < vertexPositionColors.Length; i++)
             {
-                double result = Vector2.Dot(vertexPositionColors[i].Position.ToVector2(), normal);
+                double result = Vector2.Dot(vertexPositionColors[i].Position.ToVector2(), normal) / direction.Length();
                 if (result < min)
                 {
                     min = result;
+                    minIndex = i;
                 }
                 if (result > max)
                 {
                     max = result;
+                    maxIndex = i;
                 }
             }
 
@@ -95,8 +110,25 @@ namespace DavidMonoIntro
             foreach (EffectPass pass in effectPassCollection)
             {
                 pass.Apply();
-                graphicsDevice.DrawUserPrimitives(PrimitiveType.TriangleList,
-                    vertexPositionColors, 0, 1);
+                graphicsDevice.DrawUserPrimitives(PrimitiveType.TriangleStrip,
+                    vertexPositionColors, 0, 3);
+            }
+
+            var pixel = new Texture2D(graphicsDevice, 1, 1);
+            pixel.SetData(new Color[] { Color.White });
+            for (int i = 0; i < vertexPositionColors.Length; i++)
+            {
+                var vert = vertexPositionColors[i];
+                var color = Color.Green;
+                if (i == minIndex)
+                {
+                    color = Color.Blue;
+                }
+                else if (i == maxIndex)
+                {
+                    color = Color.Red;
+                }
+                sb.Draw(pixel, new Rectangle((int)vert.Position.X, (int)vert.Position.Y, 10, 10), color * 0.40f);
             }
 
             //var pixel = new Texture2D(graphicsDevice, 1, 1);

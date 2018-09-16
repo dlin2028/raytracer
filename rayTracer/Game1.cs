@@ -18,6 +18,7 @@ namespace DavidMonoIntro
         Texture2D pixel;
         Obstacle obstacle;
         bool hit = false;
+        SpriteFont font;
         //Get as many balls bouncing on the screen and stay at 60fps
 
 
@@ -25,6 +26,8 @@ namespace DavidMonoIntro
         {
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
+            graphics.PreferredBackBufferWidth = 500;
+            graphics.PreferredBackBufferHeight = 500;
         }
 
         protected override void Initialize()
@@ -40,7 +43,7 @@ namespace DavidMonoIntro
         {
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
-
+            font = Content.Load<SpriteFont>("Font");
             pixel = new Texture2D(GraphicsDevice, 1, 1);
             pixel.SetData(new Color[] { Color.White });
             obstacle = new Obstacle(GraphicsDevice);
@@ -86,11 +89,14 @@ namespace DavidMonoIntro
             DrawLine(spriteBatch, ms.Position.ToVector2() - recip * 10, ms.Position.ToVector2() + recip * 10, Color.White);
             obstacle.Draw(spriteBatch);
 
+            spriteBatch.DrawString(font, $"Min: {obstacle.min.ToString()}\nMax: {obstacle.max.ToString()}\nX: {ms.Position.ToVector2().X}\nY: {ms.Position.ToVector2().Y}", Vector2.Zero, Color.Black);
+
             if (hit)
             {
                 spriteBatch.Draw(pixel, new Rectangle(0, 0, 10, 10), Color.Red);
             }
 
+            //DrawLine(spriteBatch, obstacle.min)
 
 
             spriteBatch.End();
